@@ -63,7 +63,6 @@ public class Parser
         Next();
         while(current.type != TokenType.End)
         {
-            Console.WriteLine($"Current: {current} l");
             switch(current.type)
             {
                 case TokenType.OpenBr or TokenType.Address:
@@ -81,6 +80,10 @@ public class Parser
 
                 case TokenType.Not:
                     instructions.Add(MakeNot());
+                continue;
+
+                case TokenType.Cmp:
+                    instructions.Add(MakeCmp());
                 continue;
 
                 case TokenType.Jmp:
@@ -171,8 +174,20 @@ public class Parser
         
 
         return new Instruction(val1,dest,Operator.Not);
+    }
+
+    private Instruction MakeCmp()
+    {
+        Expect(TokenType.Cmp);
+        Next();
+        
+        InstrValue val1 = MakeValue();
+        
+
+        return new Instruction(val1,new(),Operator.Cmp);
 
     }
+
     private Instruction MakeOp(InstrValue val1)
     {
         

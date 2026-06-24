@@ -180,6 +180,7 @@ public class Lexer
             lName += current;
             Next();
         }
+        
         return new Token(TokenType.Label, lName, lineCount);
     }
 
