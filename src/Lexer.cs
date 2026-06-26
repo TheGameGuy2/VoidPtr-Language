@@ -7,6 +7,8 @@ public enum TokenType : byte
 {
     Address,
     Label,
+    Macro,
+    EndMacro,
     Value,
     Name,
     OpenBr,
@@ -117,8 +119,11 @@ public class Lexer
             }
             else
             {
-                
-                if(current == '$')
+                if(current == '#')
+                {
+                    tokens.Add(MakeMacro());
+                }
+                else if(current == '$')
                 {
                     Next();
                     if(numbers.Contains(current))
@@ -137,6 +142,7 @@ public class Lexer
                 }
                 else if(current == '_')
                 {
+
                     tokens.Add(MakeLabel());
                 }
                 else
@@ -162,9 +168,24 @@ public class Lexer
         }
     }
 
-    private void MakeMacro()
+    private Token MakeMacro()
     {
-        
+        string macName = "";
+        Next();
+
+        while(current != '\0' && !skipChars.Contains(current))
+        {
+            macName += current;
+            Next();
+        }
+
+        if(macName == "end")
+        {
+            return new Token(TokenType.EndMacro,"end");
+        }
+        return new Token(TokenType.Macro, macName);
+
+
     }
 
     private string MakeNum()
