@@ -30,13 +30,15 @@ public struct Token
 {
     public TokenType type;
     public string val = "null";
+    public string file = "";
     public int line = -1;
 
-    public Token(TokenType typ, string val, int line)
+    public Token(TokenType typ, string val, int line, string sourceFile)
     {
         type = typ;
         this.val = val;
         this.line = line;
+        file = sourceFile;
     }
 
     public Token(TokenType typ, string val)
@@ -54,6 +56,7 @@ public struct Token
 public class Lexer
 {
     private string code;
+    private string fileName;
     private int curIndx = -1;
     private char current;
 
@@ -61,11 +64,12 @@ public class Lexer
     private Dictionary<char,Token> opMap = new();    
     private Dictionary<string, Token> keywordMap = new();
     private HashSet<char> skipChars;
-    private int lineCount = 0;
+    private int lineCount = 1;
 
-    public Lexer(string code)
+    public Lexer(string code, string fileName)
     {
         this.code = code;
+        this.fileName = fileName;
 
         skipChars = ['\n',' ','\t','\r'];
 
@@ -82,6 +86,7 @@ public class Lexer
 
         keywordMap.Add("->",new(TokenType.Assign,"->"));
     }
+
 
     private char Next()
     {
@@ -111,6 +116,7 @@ public class Lexer
             {
                 Token tcpy = tok;
                 tcpy.line = lineCount;
+                tcpy.file = fileName;
                 tokens.Add(tcpy);
             }
             else if(skipChars.Contains(current))
@@ -128,7 +134,7 @@ public class Lexer
                     Next();
                     if(numbers.Contains(current))
                     {
-                        tokens.Add(new(TokenType.Value, MakeNum(),lineCount));
+                        tokens.Add(new(TokenType.Value, MakeNum(),lineCount,fileName));
                     }
                     else
                     {
@@ -137,7 +143,7 @@ public class Lexer
                 }
                 else if(numbers.Contains(current))
                 {
-                    tokens.Add(new(TokenType.Address,MakeNum(),lineCount));
+                    tokens.Add(new(TokenType.Address,MakeNum(),lineCount,fileName));
                     curIndx--; //Else next char gets skipped.
                 }
                 else if(current == '_')
@@ -159,11 +165,12 @@ public class Lexer
     private void MakeComment()
     {
         int start = lineCount;
+        
         while(Next() != ';')
         {
             if(current == '\0')
             {
-                ErrorHandler.Throw("Unclosed comment.", start);
+                ErrorHandler.Throw($"Unclosed comment in {fileName}.", start);
             }
         }
     }
@@ -183,7 +190,7 @@ public class Lexer
         {
             return new Token(TokenType.EndMacro,"end");
         }
-        return new Token(TokenType.Macro, macName);
+        return new Token(TokenType.Macro, macName, lineCount, fileName);
 
 
     }
@@ -209,7 +216,7 @@ public class Lexer
             Next();
         }
         
-        return new Token(TokenType.Label, lName, lineCount);
+        return new Token(TokenType.Label, lName, lineCount,fileName);
     }
 
     private Token MakeKeyword()
@@ -227,11 +234,12 @@ public class Lexer
         {
             Token tcpy = tok;
             tcpy.line = lineCount;
+            tcpy.file = fileName;
             return tcpy;
         }
         else
         {
-            return new(TokenType.Name, word, lineCount);
+            return new(TokenType.Name, word, lineCount,fileName);
         }
     }
 

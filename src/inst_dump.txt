@@ -1,4 +1,0 @@
-Assign [Direct:2],[Const:1],[Direct:0]
-Not [Direct:2],[Direct:2],[Direct:0]
-Assign [Direct:1],[Const:2],[Direct:0]
-Assign [Direct:0],[Const:1],[Direct:0]

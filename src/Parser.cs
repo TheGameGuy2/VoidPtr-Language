@@ -9,7 +9,11 @@ public class Parser
     private List<Token> tokens;
     private int curIndx = -1;
     private Token current;
-    private HashSet<TokenType> opTypes = [TokenType.And,TokenType.Or, TokenType.ShiftLeft, TokenType.ShiftRight];
+    private HashSet<TokenType> opTypes = [TokenType.And,
+                                          TokenType.Or,
+                                          TokenType.ShiftLeft, 
+                                          TokenType.ShiftRight, 
+                                          TokenType.Assign];
 
     private Dictionary<string, int> labelDict = new();
     private Dictionary<string,List<int>> labelSubscribers = new(); 
@@ -32,28 +36,18 @@ public class Parser
         return new(TokenType.End,"END");
     }
 
-    private Token Peek(int reach = 1)
-    {
-        int newIndx = curIndx+reach;
-        if(newIndx<tokens.Count)
-        {
-            current = tokens[newIndx];
-            return current;
-        }
-        return new(TokenType.End,"END");
-    }
 
     private void Expect(TokenType type)
     {
         if(current.type != type)
         {
-            ErrorHandler.Throw($"Expected {type}, got {current.type}",current.line);
+            ErrorHandler.Throw($"Expected {type}, got {current.type}",current);
         }
     }
 
     private void ExpectError(string msg)
     {
-        ErrorHandler.Throw($"{msg}, got {current.type}",current.line);
+        ErrorHandler.Throw($"{msg}, got {current.type}",current);
     }
 
     public List<Instruction> MakeInstructs()
@@ -71,10 +65,6 @@ public class Parser
                     address1 = MakeAddress();
                 continue;
                 
-                case TokenType.Assign:
-                    instructions.Add(MakeAssign(address1));
-                continue;
-
                 case TokenType.Label:
                     MakeLabel(current.val, instructions.Count);
                     Next();
@@ -206,6 +196,9 @@ public class Parser
                 op = Operator.And;
             break;
 
+            case TokenType.Assign:
+                return MakeAssign(val1);
+           
             case TokenType.Or:
                 op = Operator.Or;
             break;

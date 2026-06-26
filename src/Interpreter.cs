@@ -1,4 +1,6 @@
 
+using Errors;
+
 namespace Interpreter;
 
 public class Engine
@@ -124,66 +126,86 @@ public class Engine
     {
         switch(memory[0])
         {
-            case 1:
+            case 1: //print num
                 Console.WriteLine(memory[memory[1]]);
             break;
 
-            case 2:
+            case 2: //print char
                 Console.WriteLine((char)memory[memory[1]]);
             break;
+
+            case 3: //Alloc mem
+                byte[] nArr = new byte[memory.Length+memory[memory[1]]];
+                memory.CopyTo(nArr,0);
+                memory = nArr;
+            break;
+
+            case 4: //Free mem
+                byte[] freedArr = new byte[memory.Length - memory[memory[1]]];
+                Array.Copy(memory,freedArr,Math.Min(memory.Length,freedArr.Length));
+            break;
+
         }
     }
 
     public void Run()
     {
-        while(pc<code.Count)
+        try
         {
-            switch(code[pc].type)
+            while(pc<code.Count)
             {
-                case Operator.Assign:
-                    Assign(code[pc]);
-                break;
+                switch(code[pc].type)
+                {
+                    case Operator.Assign:
+                        Assign(code[pc]);
+                    break;
 
-                case Operator.And:
-                    And(code[pc]);
-                break;
+                    case Operator.And:
+                        And(code[pc]);
+                    break;
 
-                case Operator.Or:
-                    Or(code[pc]);
-                break;
+                    case Operator.Or:
+                        Or(code[pc]);
+                    break;
 
-                case Operator.Xor:
-                    Xor(code[pc]);
-                break;
+                    case Operator.Xor:
+                        Xor(code[pc]);
+                    break;
 
-                case Operator.Not:
-                    Not(code[pc]);
-                break;
+                    case Operator.Not:
+                        Not(code[pc]);
+                    break;
 
-                case Operator.Cmp:
-                    Cmp(code[pc]);
-                break;
+                    case Operator.Cmp:
+                        Cmp(code[pc]);
+                    break;
 
-                case Operator.ShiftLeft:
-                    ShiftLeft(code[pc]);
-                break;
+                    case Operator.ShiftLeft:
+                        ShiftLeft(code[pc]);
+                    break;
 
-                case Operator.ShiftRight:
-                    ShiftRight(code[pc]);
-                break;
+                    case Operator.ShiftRight:
+                        ShiftRight(code[pc]);
+                    break;
 
-                case Operator.Jmp:
-                    Jmp(code[pc]);
-                break;
+                    case Operator.Jmp:
+                        Jmp(code[pc]);
+                    break;
 
+                }
+                if(memory[0] != 0)
+                {
+                    SysCall();
+                    memory[0] = 0;
+                }
+                pc++;
             }
-            if(memory[0] != 0)
-            {
-                SysCall();
-                memory[0] = 0;
-            }
-            pc++;
         }
+        catch(IndexOutOfRangeException)
+        {
+            ErrorHandler.Throw("Segmentation fault :3");
+        }
+        
     }
 
 

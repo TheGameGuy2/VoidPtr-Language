@@ -1,0 +1,12 @@
+#paste tungtung.sahur
+
+8000 -> $23
+
+
+2 -> $0
+not 2 set 2
+
+callptr set $2
+
+syscall sc_pnum
+
