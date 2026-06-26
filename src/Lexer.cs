@@ -14,6 +14,7 @@ public enum TokenType : byte
     Assign, // ->
     And,
     Or,
+    Xor,
     Not,
     Cmp,
     Jmp,
@@ -74,6 +75,7 @@ public class Lexer
         opMap.Add('<',new(TokenType.ShiftLeft,"<"));
         opMap.Add('>',new(TokenType.ShiftRight,">"));
         opMap.Add('?',new(TokenType.Cmp,"?"));
+        opMap.Add('^',new(TokenType.Xor,"^"));
         opMap.Add('\'',new(TokenType.Jmp,"'"));
 
         keywordMap.Add("->",new(TokenType.Assign,"->"));
@@ -158,6 +160,11 @@ public class Lexer
                 ErrorHandler.Throw("Unclosed comment.", start);
             }
         }
+    }
+
+    private void MakeMacro()
+    {
+        
     }
 
     private string MakeNum()

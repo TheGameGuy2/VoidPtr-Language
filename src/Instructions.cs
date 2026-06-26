@@ -12,11 +12,14 @@ public enum Operator : byte
     None,
     And,
     Or,
+    Xor,
     Not,
+    Cmp,
     Jmp,
     ShiftRight,
     ShiftLeft,
-    Assign
+    Assign,
+    MemSet
 }
 
 public struct InstrValue(AddressMode mode,int val)

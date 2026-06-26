@@ -61,6 +61,8 @@ public class Parser
 
         InstrValue address1 = new();
         Next();
+
+       
         while(current.type != TokenType.End)
         {
             switch(current.type)
@@ -214,6 +216,10 @@ public class Parser
 
             case TokenType.ShiftRight:
                 op = Operator.ShiftRight;
+            break;
+
+            case TokenType.Xor:
+                op = Operator.Xor;
             break;
         }
 

@@ -20,6 +20,8 @@ Parser parser = new(tokens);
 
 List<Instruction> instructions = parser.MakeInstructs();
 
+
+
 string instStr = "";
 foreach(Instruction inst in instructions)
 {
@@ -29,4 +31,6 @@ foreach(Instruction inst in instructions)
 File.WriteAllText("inst_dump.txt",instStr);
 
 
+Engine intpr = new(instructions);
+intpr.Run();
 
