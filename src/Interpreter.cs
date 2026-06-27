@@ -148,12 +148,18 @@ public class Engine
         }
     }
 
+    private void Debug(in Instruction cur)
+    {
+        Console.WriteLine($"I: {cur} \n pc: {pc} \n 3: {memory[3]}");
+    }
+
     public void Run()
     {
         try
         {
             while(pc<code.Count)
             {
+                //Debug(code[pc]);
                 switch(code[pc].type)
                 {
                     case Operator.Assign:
