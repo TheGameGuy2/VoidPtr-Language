@@ -12,6 +12,8 @@ public class PreProcessor
     private Token current;
     private Dictionary<string, List<Token>> macroDict = new();
 
+    private int globalMacroCount = 0;
+
     public PreProcessor(List<Token> tokens)
     {
         this.tokens = tokens;
@@ -52,8 +54,16 @@ public class PreProcessor
                 {
                     foreach(Token t in toks)
                     {
+                        if(t.type == TokenType.Label && t.val.StartsWith("__"))
+                        {
+                            Token localLabel = t;
+                            localLabel.val = $"{globalMacroCount}_{localLabel.val}_{globalMacroCount}";
+                            processed.Add(localLabel);
+                            continue;
+                        }
                         processed.Add(t);
                     }
+                    globalMacroCount++;
                 }
                 else
                 {
