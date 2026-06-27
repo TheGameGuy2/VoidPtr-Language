@@ -1,17 +1,6 @@
 #paste sio.vptr
 
-#def shreg
 
-sysarg ar0 ;reg. name;
-syscall $2
-
-sysarg ar1
-syscall printNum
-
-r1 -> $10
-sysarg ar1
-
-#end
 
 
 #def add8
@@ -19,41 +8,33 @@ sysarg ar1
 r0 -> v0
 r1 -> v1
 
-__add_l
-v0 ^ v1 -> v2 ;v2 stores result;
-v0 & v1 -> v3 ;v3 stores the carry;
-v3 < $1 -> v3
 
-? v2 '__add_e
-v2 -> v0
-v3 -> v1
+__add_loop
+? v1 '__end ;check if carry is 0;
 
-'__add_l
+v0 & v1 -> v2
+v0 ^ v1 -> v0
 
-__add_e
-v3 -> r0
+v2 < $1 -> v1
+
+'__add_loop
+
+
+__end
+v0 -> r0
 
 #end
 
-#def result r2 #end
-#def carry r3 #end
 
 
-r0 -> $2
+r0 -> $1
 r1 -> $3
 
-_add_loop
-? r1 '_end
-r0 ^ r1 -> r0
-r0 & r1 -> carry
+add8
 
-carry < $1 -> r1
-
-'_add_loop
-
-
-_end
-
+r0 -> $12
+r1 -> $55
+add8
 
 sysarg ar0
 syscall printNum

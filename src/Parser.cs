@@ -73,7 +73,7 @@ public class Parser
                 continue;
                 
                 case TokenType.Label:
-                    MakeLabel(current.val, instructions.Count);
+                    MakeLabel(current.val, instructions.Count-1);
                     Next();
                     lastAddress = false;
                 continue;
