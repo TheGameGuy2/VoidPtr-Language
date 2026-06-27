@@ -1,0 +1,27 @@
+#def r0 2 #end
+#def r1 3 #end
+#def r2 4 #end
+#def r3 5 #end
+#def r4 6 #end
+
+#def ar0 $2 #end
+#def ar1 $3 #end
+#def ar2 $4 #end
+#def ar3 $5 #end
+#def ar4 $6 #end
+
+#def v0 7 #end
+#def v1 8 #end
+#def v2 9 #end
+#def v3 10 #end
+#def v4 11 #end
+
+#def av0 $7 #end
+#def av1 $8 #end
+#def av2 $9 #end
+#def av3 $10 #end
+#def av4 $11 #end
+
+#def syscall 0 -> #end
+#def printNum $1 #end
+#def sysarg 1 -> #end

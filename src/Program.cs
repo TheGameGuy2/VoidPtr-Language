@@ -3,7 +3,7 @@ using Interpreter;
 using Lexing;
 using Parsing;
 
-string file = "D:/Personal/ProgramingProjects/Csharp_Projects/ByteLang/src/main.vptr";
+string file = "main.vptr";
 
 
 if(args.Length > 0)
@@ -14,7 +14,7 @@ if(args.Length > 0)
     }
     else
     {
-        ErrorHandler.Throw($"Input file '{file}' was not found.");
+        ErrorHandler.Throw($"Input file '{args[0]}' was not found.");
     }
 }
 else
