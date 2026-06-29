@@ -157,14 +157,42 @@ public class Engine
                Set32Sys();
             break;
 
-            case 8: //Load file
+            case 8:
+                LoadPCSys();
+            break;
+
+            case 9:
+                SetPCSys();
+            break;
+
+            case 10: //Load file
                 LoadFSys();
             break;
 
         }
     }
 
+    private void LoadPCSys()
+    {
+        //Loads the programm counter into space where 1 points to.
+        byte[] pcBytes = BitConverter.GetBytes((Int32)pc);
 
+        for(int i = 0; i < 4; i++)
+        {
+            memory[memory[1]+i] = pcBytes[i];
+        }
+    }
+
+    private void SetPCSys()
+    {
+        byte[] pcBytes = new byte[4];
+
+        for(int i = 0; i < 4; i++)
+        {
+           pcBytes[i] = memory[memory[1]+i];
+        }
+        pc = BitConverter.ToInt32(pcBytes);
+    }
 
     private void LoadFSys()
     {
