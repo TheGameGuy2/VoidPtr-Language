@@ -65,8 +65,8 @@ The second instruction uses that value as an address.
 </p>
 
 <div class="note">
-<strong>Note:</strong> Pointer values are limited to 255 because they occupy a single byte.
-Higher memory addresses remain accessible through system calls. Direct addressing itself is not limited.
+<strong>Note:</strong>As you may notice, this limits the address space of pointers to 255 bytes,
+higher addresses are accessible by system calls. Direct access is not limited.
 </div>
 
 <hr>
@@ -159,23 +159,23 @@ The compare instruction skips the next instruction if the value at the specified
 2 -> $5
 2 -> $7</code></pre>
 
-<p>Equivalent logic:</p>
+<p>Can be read as:</p>
 
-<pre><code>if (memory[3] == 0)
+<pre><code>if (3 == 0)
 {
-    memory[2] = 5;
+    2 -> $5
 }
-else
-{
-    memory[2] = 7;
-}</code></pre>
+else:
+    2 -> $7
+    ...
+</code></pre>
 
 <hr>
 
 <h2>Labels</h2>
 
 <p>
-Labels mark locations in code and allow jump instructions.
+Labels mark locations in code.
 </p>
 
 <pre><code>_start
@@ -183,7 +183,7 @@ Labels mark locations in code and allow jump instructions.
 _end</code></pre>
 
 <p>
-Labels beginning with a single underscore are global and may be jumped to from anywhere.
+Labels beginning with a single underscore are global and can be jumped to from anywhere.
 </p>
 
 <hr>
@@ -205,7 +205,7 @@ Labels beginning with a single underscore are global and may be jumped to from a
 <h2>System Calls</h2>
 
 <p>
-System calls allow communication with the interpreter and the outside world.
+System calls allow communication with the interpreter.
 </p>
 
 <p>
@@ -213,8 +213,8 @@ Memory locations <code>0</code> and <code>1</code> are reserved:
 </p>
 
 <ul>
-<li><strong>0</strong> — System call type</li>
-<li><strong>1</strong> — Pointer to arguments</li>
+<li><strong>0</strong>: System call type</li>
+<li><strong>1</strong>: Pointer to arguments</li>
 </ul>
 
 <div class="note">
@@ -366,7 +366,7 @@ macro_from_other_file</code></pre>
 <h3>#stream</h3>
 
 <p>
-Writes multiple constant values to consecutive memory addresses.
+Writes multiple constant values to memory.
 </p>
 
 <pre><code>#stream 8 $65 $66 $67 #end</code></pre>
