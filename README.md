@@ -5,7 +5,7 @@
 <h2>Usage</h2>
 
 <ul>
-<li>The CLI accepts <strong>0 or 1 arguments</strong>.</li>
+<li>The CLI accepts 0 or 1 arguments.</li>
 <li>If no argument is passed, VoidPtr searches for a file named <code>main.vptr</code>.</li>
 <li>If an argument is passed, VoidPtr expects it to be a file path.</li>
 <li>VoidPtr always generates token and instruction dump files for debugging purposes.</li>
@@ -40,7 +40,7 @@ Bytes are addressed by writing their numeric address.
 
 <p>
 Constants begin with <code>$</code> and are one byte wide.
-The valid range is <strong>0–255</strong>.
+The valid range is 0–255.
 </p>
 
 <pre><code>3 -> $42</code></pre>
@@ -65,7 +65,7 @@ The second instruction uses that value as an address.
 </p>
 
 <div class="note">
-<strong>Note:</strong>As you may notice, this limits the address space of pointers to 255 bytes,
+Note:As you may notice, this limits the address space of pointers to 255 bytes,
 higher addresses are accessible by system calls. Direct access is not limited.
 </div>
 
@@ -77,14 +77,14 @@ higher addresses are accessible by system calls. Direct access is not limited.
 
 <h3>Double Operations</h3>
 
-<p><strong>Structure</strong></p>
+<p>Structure</p>
 
 <pre><code>[a] operator [b] -> [destination]</code></pre>
 
 <ul>
 <li><code>a</code> must be an address.</li>
 <li>The destination must be an address.</li>
-<li><code>b</code> may be an address or a constant.</li>
+<li><code>b</code> can be an address or a constant.</li>
 </ul>
 
 <h4>Example</h4>
@@ -120,12 +120,12 @@ For shift operations, the second argument specifies the shift amount.
 
 <h3>Single Operations</h3>
 
-<p><strong>Structure</strong></p>
+<p>Structure</p>
 
 <pre><code>operator a -> destination</code></pre>
 
 <ul>
-<li><code>a</code> may be an address or constant.</li>
+<li><code>a</code> can be an address or constant.</li>
 <li>The destination must be an address.</li>
 </ul>
 
@@ -145,12 +145,12 @@ For shift operations, the second argument specifies the shift amount.
 
 <h2>Compare Operation</h2>
 
-<p><strong>Structure</strong></p>
+<p>Structure</p>
 
 <pre><code>? address</code></pre>
 
 <p>
-The compare instruction skips the next instruction if the value at the specified address is <strong>not</strong> zero.
+The compare instruction skips the next instruction if the value at the specified address is not zero.
 </p>
 
 <h3>Example</h3>
@@ -190,7 +190,7 @@ Labels beginning with a single underscore are global and can be jumped to from a
 
 <h2>Jump</h2>
 
-<p><strong>Structure</strong></p>
+<p>Structure</p>
 
 <pre><code>'label</code></pre>
 
@@ -213,12 +213,12 @@ Memory locations <code>0</code> and <code>1</code> are reserved:
 </p>
 
 <ul>
-<li><strong>0</strong>: System call type</li>
-<li><strong>1</strong>: Pointer to arguments</li>
+<li>0: System call type</li>
+<li>1: Pointer to arguments</li>
 </ul>
 
 <div class="note">
-<strong>Important:</strong> Memory address <code>0</code> is automatically reset to <code>$0</code> after every system call.
+Important: Memory address <code>0</code> is automatically reset to <code>$0</code> after every system call.
 </div>
 
 <h3>Available System Calls</h3>
@@ -290,7 +290,7 @@ Memory locations <code>0</code> and <code>1</code> are reserved:
 0 -> $2</code></pre>
 
 <p>
-Prints the character <strong>A</strong>.
+Prints the character A.
 </p>
 
 <hr>
