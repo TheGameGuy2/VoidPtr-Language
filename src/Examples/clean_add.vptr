@@ -4,8 +4,8 @@
 #def byte_a 2 #end
 #def byte_b 3 #end
 
-byte_a -> $3
-byte_b -> $1
+$3 -> byte_a
+$1 -> byte_b
 
 _add_loop
 ? byte_b '_end 
@@ -20,5 +20,5 @@ result -> byte_a
 
 _end
 
-1 -> $result
-0 -> $1
+$result -> 1 
+$1 -> 0

@@ -54,7 +54,7 @@ public class Parser
     public List<Instruction> MakeInstructs()
     {
 
-        InstrValue address1 = new();
+        InstrValue value1 = new();
         Next();
 
         bool lastAddress = false; //Check if last token was a value
@@ -63,8 +63,8 @@ public class Parser
         {
             switch(current.type)
             {
-                case TokenType.OpenBr or TokenType.Address:
-                    address1 = MakeAddress();
+                case TokenType.OpenBr or TokenType.Address or TokenType.AsValue:
+                    value1 = MakeValue();
                     if(lastAddress)
                     {
                         ExpectError("Expected operation");
@@ -106,7 +106,7 @@ public class Parser
             //Double operators are generated here
             if(opTypes.Contains(current.type))
             {
-                instructions.Add(MakeOp(address1));
+                instructions.Add(MakeOp(value1));
                 lastAddress = false;
             }
             else
@@ -175,7 +175,7 @@ public class Parser
 
         Next();
 
-        InstrValue val2 = MakeValue();
+        InstrValue val2 = MakeAddress();
 
         return new Instruction(val1,val2,Operator.Assign);
 

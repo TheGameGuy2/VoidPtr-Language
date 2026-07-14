@@ -31,7 +31,7 @@ Constants
 Constants are denominated by $ and can be at most a byte.
 Number range is 0 - 255.
 
-3 -> $42
+$42 -> 3
 (Sets byte 3 to value 42)
 
 
@@ -39,7 +39,7 @@ Indirect addressing
 
 You can use a value stored in a byte as an address.
 
-3 -> $6 
+$6 -> 3
 (Moves the value 6 into 3)
 
 [3] -> 4
@@ -55,12 +55,12 @@ Logical operations are performed bitwise.
 -Double operations (2 inputs, 1 output)
     structure: [a] operator [b] -> [dest. address]
 
-    a has to be an address.
+    a can be a value or an address.
     The destination has to be an address.
     b can be a value or an address.
 
-    2 -> $1
-    3 -> $0
+    $1 -> 1
+    $0 -> 3
 
     2 & 3 -> 4
     (performes bitwise and on 2 and 3 and writes result to 4)
@@ -105,8 +105,8 @@ The compare operation
     The statement:
 
         ? 3
-        2 -> $5
-        2 -> $7
+        $5 -> 2
+        $7 -> 3
 
     Can be read as:
         if(3 == 0)
@@ -170,12 +170,12 @@ System calls
             layout: [filename] [\0] [32bit load address]
         
     Example:
-        2 -> $65
+        $65 -> 2
 
-        1 -> $2
+        $2 -> 1
         (Pass reference to 2 as argument)
 
-        0 -> $2
+        $2 -> 0
         (Call print character. Prints: 'A')
 
 
@@ -190,10 +190,7 @@ All macros start with #, some macros require you to end them with #end.
     The define macro lets you define a name which later gets replaced by the code you write into its body.
 
   #def reset_mem
-        2 -> $0
-        3 -> $0
-        4 -> $0
-        5 -> $0
+        $0 -> 2 -> 3 -> 4 -> 5
     #end
 
     Inside a programm:
@@ -205,12 +202,12 @@ All macros start with #, some macros require you to end them with #end.
         reset_mem (code of reset_mem gets inserted here.)
 
     You are allowed to use previously defined macros inside of macros:
-        #def print_3 1 -> $3 0 -> $1 #end
+        #def print_3 $3 -> 1 $1 -> 0 #end
 
         #def my_macro
-            3 -> $5
+            $5 -> 3
             print_3 
-            3 -> 2$
+            $2 -> 3
             print_3
         #end
 
@@ -243,20 +240,20 @@ All macros start with #, some macros require you to end them with #end.
         #stream 8 $65 $66 $67 #end
 
         compiles to:
-            8 -> $65
-            9 -> $66
-            10 -> $67
-
+            $65 -> 8
+            $66 -> 9
+            $67 -> 10
+ 
 
 Strings
 
 Strings get compiled to const values.
 
     Example:
-        2 -> "A"
+        "A" -> 2
 
         compiles to:
-        2 -> $65 (ascii value of A)
+        $65 -> 2 (ascii value of A)
 
 Strings can be used with stream to easily write sentences:
     #stream 2 "Hello World" $0 #end

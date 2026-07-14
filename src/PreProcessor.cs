@@ -107,11 +107,13 @@ public class PreProcessor
             Next();
             Expect(TokenType.Address);
             
-            processed.Add(new(TokenType.Address,$"{streamAdr}",current.line,current.file));
-            processed.Add(new(TokenType.Assign,"->",current.line,current.file));
-        
             processed.Add(new(TokenType.AsValue,"$",current.line,current.file));
             processed.Add(current);
+
+            processed.Add(new(TokenType.Assign,"->",current.line,current.file));
+
+            processed.Add(new(TokenType.Address,$"{streamAdr}",current.line,current.file));
+            
             Next();
             streamAdr++;
 
@@ -128,6 +130,7 @@ public class PreProcessor
         string code;
         try
         {
+            //TODO: search for file relative to current file
             code = File.ReadAllText(current.val);
         }
         catch

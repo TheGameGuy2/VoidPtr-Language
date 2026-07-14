@@ -36,9 +36,9 @@ public class Engine
     // ->
     private void Assign(in Instruction instruction)
     {
-        if(instruction.val2.mode == AddressMode.Const)
+        if(instruction.val1.mode == AddressMode.Const)
         {
-            memory[MemAccess(instruction.val1)] = (byte)instruction.val2.value;
+            memory[MemAccess(instruction.val2)] = (byte)instruction.val1.value;
             return;
         }
         memory[MemAccess(instruction.val2)] = memory[MemAccess(instruction.val1)];

@@ -10,8 +10,8 @@ make sure not to load any programms which exceed programm space.
 
 #stream 20 "main.bf" $0 $28 #end
 
-1 -> $20 ;pass file call argument pointer;
-syscall $10 ;Load file;
+$20 -> 1 ;pass file call argument pointer;
+$10 syscall  ;Load file;
 
 
 #def pointer r3 #end ;byte holding the bf pointer;
@@ -20,10 +20,14 @@ syscall $10 ;Load file;
 
 ;mem layout: 28 - 160 code, 161 - 170 loop stack, 171 - 255 bf memory; 
 
-pointer -> $171
-stack_ptr -> $161
-pc -> $27
-r1 -> $1
+$171 -> pointer 
+$161 -> stack_ptr
+$27 -> pc
+
+
+#def reset_r1 $1 -> r1 #end 
+reset_r1
+
 
 '_main
 
@@ -31,7 +35,7 @@ r1 -> $1
 ;> op;
 _inc_ptr 
     pointer -> r0
-    r1 -> $1
+    reset_r1
     add8
     r0 -> pointer
 
@@ -41,7 +45,7 @@ _inc_ptr
 _dec_ptr 
 
     pointer -> r0
-    r1 -> $1
+    reset_r1
     sub8
     r0 -> pointer
 
@@ -51,7 +55,7 @@ _dec_ptr
 _plus 
 
     [pointer] -> r0
-    r1 -> $1
+    reset_r1
     add8
     r0 -> [pointer]
 
@@ -60,7 +64,7 @@ _plus
 ;- op;
 _minus
     [pointer] -> r0
-    r1 -> $1
+    reset_r1
     sub8
     r0 -> [pointer]
 
@@ -70,7 +74,7 @@ _minus
 _out 
 
     pointer -> 1
-    syscall printChar
+    printChar syscall 
 
     '_main
 
@@ -79,7 +83,7 @@ _out
 _in 
 
     pointer -> 1
-    syscall getChar
+    getChar syscall 
 
     '_main
 
@@ -89,7 +93,7 @@ _start_loop
 
     ;enter loop;
     stack_ptr -> r0
-    r1 -> $1
+    reset_r1
     add8
     r0 -> stack_ptr
     pc -> [stack_ptr] ;push current pc to loop stack;
@@ -100,14 +104,14 @@ _start_loop
     __skip_loop
         ;increase pc;
         pc -> r0
-        r1 -> $1
+        reset_r1
         add8
         r0 -> pc
 
         ? [pc] '_end ;end if we reach 0;
 
         [pc] -> r0
-        r1 -> "]"
+        "]" -> r1
         sub8
         ? r0 '_main
         '__skip_loop
@@ -124,7 +128,7 @@ _end_loop
 
     __pop_loop
     stack_ptr -> r0
-    r1 -> $1
+    reset_r1
     sub8
     r0 -> stack_ptr
     '_main
@@ -140,52 +144,53 @@ _main
 
 ;increase pc;
 pc -> r0
-r1 -> $1
+reset_r1
 add8
 r0 -> pc
 
-;print vlaue at r4 ptr
+
+;print vlaue at r4 ptr (current BF character)
 pc -> 1
-syscall printChar
+printChar syscall 
 ;
 
 [pc] -> r0
-r1 -> ">"
+">" -> r1 
 sub8
 ? r0 '_inc_ptr
 
 [pc] -> r0
-r1 -> "<"
+"<" -> r1 
 sub8
 ? r0 '_dec_ptr
 
 [pc] -> r0
-r1 -> "+"
+"+" -> r1
 sub8
 ? r0 '_plus
 
 [pc] -> r0
-r1 -> "-"
+"-" -> r1
 sub8
 ? r0 '_minus
 
 [pc] -> r0
-r1 -> "."
+"." -> r1
 sub8
 ? r0 '_out
 
 [pc] -> r0
-r1 -> ","
+"," -> r1
 sub8
 ? r0 '_in
 
 [pc] -> r0
-r1 -> "["
+"[" -> r1
 sub8
 ? r0 '_start_loop
 
 [pc] -> r0
-r1 -> "]"
+"]" -> r1
 sub8
 ? r0 '_end_loop
 

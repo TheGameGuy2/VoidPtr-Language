@@ -26,11 +26,11 @@ __end
     ? [2] '_end
 
     [2] -> 3
-    1 -> $3
-    0 -> $2
+    $3 -> 1
+    $2 -> 0
 
     2 -> 3
-    4 -> $1
+    $1 -> 4
     add8
 
     3 -> 2
@@ -43,7 +43,7 @@ __end
 #end
 
 #def language=good
-    2
+    $15
 #end
 
 #def bugs=0 
@@ -51,7 +51,7 @@ __end
 #end
 
 #def hello_conputer_please_world
-    $15
+    2
 #end
 
 

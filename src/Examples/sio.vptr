@@ -22,7 +22,7 @@
 #def le 20 #end
 
 ;system call;
-#def syscall 0 -> #end
+#def syscall -> 0  #end
 #def printNum $1 #end
 #def printChar $2 #end
 #def getChar $3 #end
@@ -55,7 +55,7 @@ a0 -> r0
 #def sub8 
     ! r1 -> r1
     r0 -> s0
-    r0 -> $1
+    $1 -> r0
     add8
 
     r0 -> r1
