@@ -43,7 +43,7 @@ Constants begin with <code>$</code> and are one byte wide.
 The valid range is 0–255.
 </p>
 
-<pre><code>3 -> $42</code></pre>
+<pre><code>$42 -> 3</code></pre>
 
 <p>Sets byte <code>3</code> to the value <code>42</code>.</p>
 
@@ -55,7 +55,7 @@ The valid range is 0–255.
 A byte can be used as a pointer to another address.
 </p>
 
-<pre><code>3 -> $6
+<pre><code>$6 -> 3
 
 [3] -> 4</code></pre>
 
@@ -89,12 +89,12 @@ higher addresses are accessible by system calls. Direct access is not limited.
 
 <h4>Example</h4>
 
-<pre><code>2 -> $1
-3 -> $0
+<pre><code>$1 -> 2
+$0 -> 3
 
 2 &amp; 3 -> 4
 
-2 &amp; $1 -> 4</code></pre>
+2 &amp; 4 -> $1</code></pre>
 
 <p>
 The first operation performs a bitwise AND between addresses 2 and 3.
@@ -156,8 +156,8 @@ The compare instruction skips the next instruction if the value at the specified
 <h3>Example</h3>
 
 <pre><code>? 3
-2 -> $5
-2 -> $7</code></pre>
+$5 -> 2
+$7 -> 2</code></pre>
 
 <p>Can be read as:</p>
 
@@ -283,11 +283,11 @@ Important: Memory address <code>0</code> is automatically reset to <code>$0</cod
 
 <h3>Example</h3>
 
-<pre><code>2 -> $65
+<pre><code>$65 -> 2
 
-1 -> $2
+$2 -> 1
 
-0 -> $2</code></pre>
+$2 -> 0</code></pre>
 
 <p>
 Prints the character A.
@@ -305,10 +305,10 @@ Every macro begins with <code>#</code>.
 <h3>#def</h3>
 
 <pre><code>#def reset_mem
-    2 -> $0
-    3 -> $0
-    4 -> $0
-    5 -> $0
+    $0 -> 2 
+    -> 3
+    -> 4
+    -> 5
 #end</code></pre>
 
 <p>Usage:</p>
@@ -322,15 +322,15 @@ reset_mem</code></pre>
 <h3>Macros inside Macros</h3>
 
 <pre><code>#def print_3
-    1 -> $3
-    0 -> $1
+    $3 -> 1
+    $1 -> 0
 #end
 
 #def my_macro
-    3 -> $5
+    $5 -> 3
     print_3
 
-    3 -> $2
+    $2 -> 3
     print_3
 #end</code></pre>
 
@@ -373,9 +373,9 @@ Writes multiple constant values to memory.
 
 <p>Compiles to:</p>
 
-<pre><code>8  -> $65
-9  -> $66
-10 -> $67</code></pre>
+<pre><code>$65 -> 8
+$66 -> 9
+$67 -> 10</code></pre>
 
 <hr>
 
@@ -387,11 +387,11 @@ String literals are compiled into constant ASCII values.
 
 <h3>Example</h3>
 
-<pre><code>2 -> "A"</code></pre>
+<pre><code>"A" -> 2</code></pre>
 
 <p>Compiles to:</p>
 
-<pre><code>2 -> $65</code></pre>
+<pre><code>$65 -> 2</code></pre>
 
 <h3>Strings with #stream</h3>
 
