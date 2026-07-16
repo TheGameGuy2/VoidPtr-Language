@@ -374,11 +374,12 @@ def main():
     root = AstProg.parse(stream)
 
     #fasm header
-    mem_size = root.size()
+    #TODO! rip out node.size
+    mem_size = 1 << 16
     emitter("format ELF64 executable")
     emitter("entry start")
     emitter(f"mem: rq {mem_size}")
-    emitter(f"buf: rb 256 \n db 10")
+    emitter(f"buf: rb 4096 \n db 10")
     emitter("segment readable executable")
     emitter(f"""
 sys:
@@ -386,13 +387,15 @@ sys:
     je sys_print
     cmp qword [mem], 2
     je sys_char_out
+    cmp qword [mem], 10
+    je sys_file
     ret
 
 sys_print:
     mov rax, [mem + {WORD_SIZE}]        ; load pointer
     mov rax, [mem + rax*{WORD_SIZE}]    ; load value
     mov rsi, 10                         ; divisor = 10
-    mov rdi, 255                        ; digit index
+    mov rdi, 4095                       ; digit index
 
 sys_print_build:
     xor rdx, rdx                        ; clear high register
@@ -405,7 +408,7 @@ sys_print_build:
     jne sys_print_build                 ; check loop exit
     inc rdi
 
-    mov rdx, 255
+    mov rdx, 4095
     sub rdx, rdi
     inc rdx
     inc rdx
@@ -427,6 +430,53 @@ sys_char_out:
     mov rax, 1
     syscall
     ret
+
+sys_file:
+    mov rsi, [mem + {WORD_SIZE}]
+    mov rdi, buf
+sys_file_path_loop:
+    mov rax, [mem + rsi*{WORD_SIZE}]
+    mov [rdi], rax
+    inc rsi
+    inc rdi
+
+    cmp rax, 0
+    jne sys_file_path_loop
+    mov r10, [mem + rsi*{WORD_SIZE}]
+
+
+    mov rdi, buf    ; filename = buf
+    mov rsi, 0      ; no flags
+    mov rdx, 0      ; mode = readonly
+    mov rax, 2      ; sys_open
+    syscall
+
+    mov rdi, rax    ; file pointer
+    mov rsi, buf    ; load file into buffer
+    mov rdx, 4096   ; max read
+    mov rax, 0      ; sys_read
+    syscall
+    mov rdx, rax    ; save number of read bytes
+
+    mov rax, 3      ; sys_close
+    syscall
+
+
+    mov rdi, r10    ; copy destination
+    mov rsi, buf    ; copy source
+sys_file_read_loop: 
+    xor rax, rax
+    mov al, byte [rsi]
+    mov [mem+rdi*{WORD_SIZE}], rax
+    inc rsi
+    inc rdi
+
+    dec rdx
+    jne sys_file_read_loop
+
+    ret
+
+
             """)
 
     emitter("start:")
