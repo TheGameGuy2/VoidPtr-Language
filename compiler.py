@@ -8,6 +8,8 @@ from dataclasses import dataclass as dc
 import itertools
 import subprocess
 
+# 64-bit compiler => 8 bytes per word
+WORD_SIZE = 8
 
 def lex(path):
     class Streamer:
@@ -18,7 +20,7 @@ def lex(path):
             return self.toks[offset] if len(self.toks) > offset else None
 
         def pop(self):
-            return self.toks.pop(0)
+            return str(self.toks.pop(0))
 
         def has(self):
             return len(self.toks) > 0
@@ -167,6 +169,8 @@ class AstValue:
             case '$':
                 x = stream.pop()
                 return cls(int(x), 'lit')
+            case x if '"' in x:
+                return cls(ord(x.strip('"')[0]), 'lit')
             case x:
                 return cls(int(x), 'direct')
 
@@ -174,23 +178,61 @@ class AstValue:
         return self.number if self.kind in ('direct', 'indirect') else 0
 
     def load(self, emit, reg):
-        addr = self.number * 8
+        addr = self.number * WORD_SIZE
         match self.kind:
             case 'lit':      emit(f'mov {reg}, {self.number}')
             case 'direct':   emit(f'mov {reg}, [mem + {addr}]')
             case 'indirect': 
                 emit(f'mov {reg}, [mem + {addr}]')
-                emit(f'mov {reg}, [mem + {reg}*8]')
+                emit(f'mov {reg}, [mem + {reg}*{WORD_SIZE}]')
+
+    def store(self, emit, reg):
+        addr = self.number * WORD_SIZE
+        match self.kind:
+            case 'lit':
+                print("Error: Storing into literal value")
+                sys.exit(1)
+            case 'direct':
+                emit(f'mov [mem + {addr}], {reg}')
+            case 'indirect':
+                emit(f'mov rdi, [mem + {addr}]')
+                emit(f'mov [mem + rdi*{WORD_SIZE}], rdi')
+
+        if self.number == 0: #syscall
+            emit('call sys')
+
+
+@dc
+class AstNot:
+    src : AstValue
+    dst : AstValue
+
+    @classmethod
+    def parse(cls, stream):
+        stream.expect("!")
+        src = AstValue.parse(stream)
+        stream.expect("->")
+        dst = AstValue.parse(stream)
+        return cls(src, dst)
+
+    def size(self):
+        return max(self.src.size(), self.dst.size())
+
+    def compile(self, emit):
+        self.src.load(emit, 'rax')
+        emit('not rax')
+        self.dst.store(emit, 'rax')
 
 
 ops = { '&':'and', '|':'or', '^':'xor', '<':'shl', '>':'shr' }
+
 
 @dc
 class AstAssign:
     a : AstValue
     b : AstValue
     op : Literal['and', 'or', 'xor', 'shl', 'shr', 'none']
-    dst : int
+    dst : AstValue
 
     @classmethod
     def parse(cls, stream):
@@ -203,7 +245,7 @@ class AstAssign:
             b = AstValue.parse(stream)
 
         stream.expect('->')
-        dst = int(stream.pop())
+        dst = AstValue.parse(stream)
 
         return cls(a, b, op, dst)
 
@@ -211,7 +253,7 @@ class AstAssign:
         return max(
             self.a.size(), 
             self.b.size() if self.b is not None else 0,
-            self.dst
+            self.dst.size()
         )
 
     def compile(self, emit):
@@ -222,9 +264,7 @@ class AstAssign:
             self.b.load(emit, reg)
             emit(f"{self.op} rax, {reg}")
 
-        emit(f'mov [mem + {self.dst*8}], rax')
-        if self.dst == 0: #syscall
-            emit('call sys')
+        self.dst.store(emit, 'rax')
 
 
 
@@ -297,6 +337,7 @@ class AstProg:
             case x if x.startswith('_'): return AstLabel.parse(stream)
             case "'":                    return AstJump.parse(stream)
             case '?':                    return AstBranch.parse(stream)
+            case '!':                    return AstNot.parse(stream)
             case _:                      return AstAssign.parse(stream)
 
 
@@ -339,7 +380,7 @@ def main():
     emitter(f"mem: rq {mem_size}")
     emitter(f"buf: rb 256 \n db 10")
     emitter("segment readable executable")
-    emitter("""
+    emitter(f"""
 sys:
     cmp qword [mem], 1
     je sys_print
@@ -348,20 +389,20 @@ sys:
     ret
 
 sys_print:
-    mov rax, [mem + 8]          ; load pointer
-    mov rax, [mem + rax*8]      ; load value
-    mov rsi, 10                 ; divisor = 10
-    mov rdi, 255                ; digit index
+    mov rax, [mem + {WORD_SIZE}]        ; load pointer
+    mov rax, [mem + rax*{WORD_SIZE}]    ; load value
+    mov rsi, 10                         ; divisor = 10
+    mov rdi, 255                        ; digit index
 
 sys_print_build:
-    xor rdx, rdx                ; clear high register
-    div rsi                     ; extract digit
-    add dl, 48                  ; convert to ascii
-    mov [buf + rdi], dl         ; save digit
+    xor rdx, rdx                        ; clear high register
+    div rsi                             ; extract digit
+    add dl, 48                          ; convert to ascii
+    mov [buf + rdi], dl                 ; save digit
     dec rdi
 
     cmp rax, 0
-    jne sys_print_build         ; check loop exit
+    jne sys_print_build                 ; check loop exit
     inc rdi
 
     mov rdx, 255
@@ -369,15 +410,15 @@ sys_print_build:
     inc rdx
     inc rdx
 
-    lea rsi, byte [rdi+buf]     ; buf = buffer + index
-    mov rdi, 1                  ; fd = stdout
-    mov rax, 1                  ; sys_write
+    lea rsi, byte [rdi+buf]             ; buf = buffer + index
+    mov rdi, 1                          ; fd = stdout
+    mov rax, 1                          ; sys_write
     syscall
     ret
 
 sys_char_out:
-    mov rax, [mem + 8]
-    mov rax, [mem + rax*8]
+    mov rax, [mem + {WORD_SIZE}]
+    mov rax, [mem + rax*{WORD_SIZE}]
     mov [buf], rax
 
     mov rdx, 1
