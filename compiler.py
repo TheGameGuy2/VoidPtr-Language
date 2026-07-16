@@ -10,6 +10,7 @@ import subprocess
 
 # 64-bit compiler => 8 bytes per word
 WORD_SIZE = 8
+MEM_SIZE  = 1 << 16 # 65535 words should be enough
 
 def lex(path):
     class Streamer:
@@ -174,9 +175,6 @@ class AstValue:
             case x:
                 return cls(int(x), 'direct')
 
-    def size(self):
-        return self.number if self.kind in ('direct', 'indirect') else 0
-
     def load(self, emit, reg):
         addr = self.number * WORD_SIZE
         match self.kind:
@@ -215,9 +213,6 @@ class AstNot:
         dst = AstValue.parse(stream)
         return cls(src, dst)
 
-    def size(self):
-        return max(self.src.size(), self.dst.size())
-
     def compile(self, emit):
         self.src.load(emit, 'rax')
         emit('not rax')
@@ -249,13 +244,6 @@ class AstAssign:
 
         return cls(a, b, op, dst)
 
-    def size(self):
-        return max(
-            self.a.size(), 
-            self.b.size() if self.b is not None else 0,
-            self.dst.size()
-        )
-
     def compile(self, emit):
         self.a.load(emit ,"rax")
 
@@ -277,9 +265,6 @@ class AstLabel:
     def parse(cls, stream):
         return cls(stream.pop())
 
-    def size(self):
-        return 0
-
     def compile(self, emit):
         emit(f'{self.name}:')
 
@@ -292,9 +277,6 @@ class AstJump:
     def parse(cls, stream):
         stream.expect("'")
         return cls(stream.pop())
-
-    def size(self):
-        return 0
 
     def compile(self, emit):
         emit(f'jmp {self.name}')
@@ -313,9 +295,6 @@ class AstBranch:
         cond = AstValue.parse(stream)
         target = AstProg.parse_node(stream)
         return cls(cond, target)
-
-    def size(self):
-        return max(self.cond.size(), self.target.size())
 
     def compile(self, emit):
         skip_label = f"skip{next(skip_gen)}"
@@ -350,9 +329,6 @@ class AstProg:
         ): nodes.append(node)
         return cls(nodes)
 
-    def size(self):
-        return max(x.size() for x in self.nodes)
-
     def compile(self, emit):
         for node in self.nodes:
             node.compile(emit)
@@ -374,11 +350,9 @@ def main():
     root = AstProg.parse(stream)
 
     #fasm header
-    #TODO! rip out node.size
-    mem_size = 1 << 16
     emitter("format ELF64 executable")
     emitter("entry start")
-    emitter(f"mem: rq {mem_size}")
+    emitter(f"mem: rq {MEM_SIZE}")
     emitter(f"buf: rb 4096 \n db 10")
     emitter("segment readable executable")
     emitter(f"""
