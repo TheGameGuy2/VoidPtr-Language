@@ -41,11 +41,13 @@ def lex(path):
                 case ' ' | '\t' | '\n' | '\r': return 'format'
                 case ';': return 'comment'
                 case '\0': return 'terminator'
+                case '"': return 'quote'
                 case _: return 'symb'
 
         state = None 
         buffer = ''
         comment = False
+        string  = False
         toks = []
         for char in src + '\n':
             kind = get(char)
@@ -55,7 +57,12 @@ def lex(path):
                 buffer = ''
                 continue
 
-            if kind != state and not comment:
+            if kind == 'quote':
+                if not string: buffer = ''
+                state = 'quote'
+                string = not string
+
+            if kind != state and not comment and not string:
                 if state != 'format' and buffer:
                     toks.append(buffer)
                 buffer = '' 
@@ -106,6 +113,21 @@ def lex(path):
                         usage[name] = 0
                     case 'end':
                         break
+                    case 'stream':
+                        base = int(get())
+                        content = run()
+                        while content:
+                            first = content.pop(0)
+                            if '"' in first:
+                                for char in first.strip('"'):
+                                    out += ['$', ord(char), '->', base]
+                                    base += 1
+                                continue
+
+                            assert first == '$'
+                            out += ['$', content.pop(0), '->', base]
+                            base += 1
+
 
             return out
 
