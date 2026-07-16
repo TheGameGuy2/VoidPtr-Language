@@ -194,7 +194,7 @@ class AstValue:
                 emit(f'mov [mem + {addr}], {reg}')
             case 'indirect':
                 emit(f'mov rdi, [mem + {addr}]')
-                emit(f'mov [mem + rdi*{WORD_SIZE}], rdi')
+                emit(f'mov [mem + rdi*{WORD_SIZE}], {reg}')
 
         if self.number == 0: #syscall
             emit('call sys')
