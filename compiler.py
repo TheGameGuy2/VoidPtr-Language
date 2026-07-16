@@ -329,6 +329,8 @@ def main():
 sys:
     cmp qword [mem], 1
     je sys_print
+    cmp qword [mem], 2
+    je sys_char_out
     ret
 
 sys_print:
@@ -358,6 +360,18 @@ sys_print_build:
     mov rax, 1                  ; sys_write
     syscall
     ret
+
+sys_char_out:
+    mov rax, [mem + 8]
+    mov rax, [mem + rax*8]
+    mov [buf], rax
+
+    mov rdx, 1
+    mov rsi, buf
+    mov rdi, 1
+    mov rax, 1
+    syscall
+    ret
             """)
 
     emitter("start:")
@@ -375,6 +389,7 @@ sys_print_build:
 
     subprocess.run(['fasm', build_path, out_path])
     subprocess.run(['chmod', '+x', out_path])
+    subprocess.run([f'./{out_path}'])
 
 
 
