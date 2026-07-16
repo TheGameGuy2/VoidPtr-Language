@@ -138,7 +138,7 @@ class AstValue:
         return self.number if self.kind in ('direct', 'indirect') else 0
 
     def load(self, emit, reg):
-        addr = self.number * 4
+        addr = self.number * 8
         match self.kind:
             case 'lit':      emit(f'mov {reg}, {self.number}')
             case 'direct':   emit(f'mov {reg}, [mem + {addr}]')
@@ -186,7 +186,10 @@ class AstAssign:
             self.b.load(emit, reg)
             emit(f"{self.op} rax, {reg}")
 
-        emit(f'mov [mem + {self.dst*4}], rax')
+        emit(f'mov [mem + {self.dst*8}], rax')
+        if self.dst == 0: #syscall
+            emit('call sys')
+
 
 
 
@@ -298,6 +301,7 @@ def main():
     emitter("format ELF64 executable")
     emitter("entry start")
     emitter(f"mem: rq {mem_size}")
+    emitter(f"buf: rb 256 \n db 10")
     emitter("segment readable executable")
     emitter("""
 sys:
@@ -306,8 +310,32 @@ sys:
     ret
 
 sys_print:
-    mov rax, [mem + 1]
-    mov rax, [mem + rax]
+    mov rax, [mem + 8]          ; load pointer
+    mov rax, [mem + rax*8]      ; load value
+    mov rsi, 10                 ; divisor = 10
+    mov rdi, 255                ; digit index
+
+sys_print_build:
+    xor rdx, rdx                ; clear high register
+    div rsi                     ; extract digit
+    add dl, 48                  ; convert to ascii
+    mov [buf + rdi], dl         ; save digit
+    dec rdi
+
+    cmp rax, 0
+    jne sys_print_build         ; check loop exit
+    inc rdi
+
+    mov rdx, 255
+    sub rdx, rdi
+    inc rdx
+    inc rdx
+
+    lea rsi, byte [rdi+buf]     ; buf = buffer + index
+    mov rdi, 1                  ; fd = stdout
+    mov rax, 1                  ; sys_write
+    syscall
+    ret
             """)
 
     emitter("start:")
