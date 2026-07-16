@@ -42,6 +42,7 @@ def lex(path):
                 case x if x.isalpha(): return 'iden'
                 case '_': return 'iden'
                 case '.': return 'iden'
+                case '=': return 'iden'
                 case ' ' | '\t' | '\n' | '\r': return 'format'
                 case ';': return 'comment'
                 case '\0': return 'terminator'
