@@ -1,4 +1,4 @@
-
+# VoidPtr compiler implementation by: S1monr3dst0ne07 <https://github.com/S1monr3dst0ne07>
 
 
 import sys
