@@ -1,0 +1,37 @@
+
+#stream 10 "hello world" $10 $0 #end
+
+
+#def counter 3 #end
+#def data    4 #end
+#def bit     5 #end
+#def tmp     6 #end
+
+$10 -> counter
+_loop
+    [counter] -> data
+
+    $ data -> 1
+    $2 -> 0
+
+    $1 -> bit
+    _add
+        counter & bit -> tmp
+        counter ^ bit -> counter
+        tmp < $1      -> bit
+    ? bit '_done
+    '_add
+    _done
+
+    ? data '_exit
+    '_loop
+_exit
+
+
+
+
+
+
+
+
+
