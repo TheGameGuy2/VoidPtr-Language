@@ -1,5 +1,5 @@
 
-TARGET=Examples/hello.vptr
+TARGET=../Examples/hello.vptr
 
 run: build
 	./build.out
