@@ -1,6 +1,6 @@
 #paste sio.vptr
 
-#stream 10 "hello.txt" $0 $20 #end
+#stream 10 "Examples/hello.txt" $0 $20 #end
 
 $10 -> 1
 $10 -> 0
