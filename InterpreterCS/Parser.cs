@@ -127,6 +127,11 @@ public class Parser
         return instructions;
     }
 
+    public Dictionary<int,string> GetLabelDecode()
+    {
+        return labelDict.ToDictionary(x => x.Value, y => y.Key);
+    }
+
     //Define a label
     private void MakeLabel(string name, int instrIndx)
     {

@@ -17,10 +17,12 @@ public class PreProcessor
     private Dictionary<string, List<Token>> macroDict = new();
 
     private int globalMacroCount = 0; //Used to generate unique names for local labels.
+    private string mainFile; 
 
-    public PreProcessor(List<Token> tokens)
+    public PreProcessor(List<Token> tokens, string mainFile)
     {
         this.tokens = tokens;
+        this.mainFile = mainFile;
     }
 
     private void Expect(TokenType type)
@@ -128,20 +130,23 @@ public class PreProcessor
         Expect(TokenType.Name);
         
         string code;
+        string relFilePath = current.file;
         try
         {
-            //TODO: search for file relative to current file
-            code = File.ReadAllText(current.val);
+            relFilePath = Path.Combine(Path.GetDirectoryName(current.file),current.val);
+            code = File.ReadAllText(relFilePath);
+            
         }
         catch
         {
-            ErrorHandler.Throw($"Could not find file '{current.val}' to paste.",current);
+            ErrorHandler.Throw($"Could not find file '{relFilePath}' to paste.",current);
             return;
         }
 
         //Getting file tokens by creating a new lexer.
-        Lexer l = new(code, current.val); //current.val holds the prev. loaded file name.
+        Lexer l = new(code, relFilePath); //current.val holds the prev. loaded file name.
         int cur = curIndx+1; //+1 because insert pushes elements towards end.
+
 
         //Insert each token from file, time complexity can be terrible here.
         foreach(Token t in l.MakeTokens())

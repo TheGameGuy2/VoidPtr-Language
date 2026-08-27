@@ -2,6 +2,7 @@
 using Lexing;
 using Parsing;
 using Interpreter;
+using System.IO;
 
 string file = "main.vptr";
 
@@ -9,11 +10,11 @@ if(args.Length > 0)
 {
     if(File.Exists(args[0]))
     {
-        file = args[0];
+        file = Path.GetFullPath(args[0]);
     }
     else
     {
-        ErrorHandler.Throw($"Input file '{args[0]}' was not found.");
+        ErrorHandler.Throw($"Input file '{Path.GetFullPath(args[0])}' was not found.");
     }
 }
 else
@@ -33,7 +34,7 @@ string toks = "";
 
 List<Token> tokens = l.MakeTokens();
 
-PreProcessor processor = new(tokens);
+PreProcessor processor = new(tokens,file);
 
 tokens = processor.Process();
 
