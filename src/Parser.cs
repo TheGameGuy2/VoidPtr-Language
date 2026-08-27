@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Errors;
 using Interpreter;
 using Lexing;
@@ -125,6 +126,11 @@ public class Parser
         }
 
         return instructions;
+    }
+
+    public Dictionary<int,string> GetLabelDecode()
+    {
+        return labelDict.ToDictionary(x => x.Value, y => y.Key);
     }
 
     //Define a label
