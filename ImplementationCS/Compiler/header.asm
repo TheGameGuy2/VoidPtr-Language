@@ -1,11 +1,10 @@
 bits 64
 
-section .bss
-    memory: resb 256
+%define memory r12 ;heap pointer
 
 section .rodata
-    callmap: dq _sys.printchar, _sys.printnum, _sys.readchar
-    call_map_max equ $
+    callmap: dq _sys.printchar, _sys.printnum, _sys.readchar, _sys.allocbytes, _sys.deallocbytes
+    call_map_max equ ($-callmap)/8
 
 section .text
 
@@ -18,8 +17,6 @@ _sys.dsyscall: ;called when 0 is written indirectly and can't be resolved at com
     jz .invalidcall
 
     sub rax,1
-
-    lea rax, [callmap+rax*8]
 
     cmp rax,call_map_max ;bound checkings
     jge .invalidcall
@@ -65,8 +62,8 @@ _sys.printnum:
     ret
 
 _sys.readchar:
-    movzx rbx, byte [memory+1] ;load pointer value from 1
-    lea rsi, [memory + rbx]
+    movzx rdx, byte [memory+1] ;load pointer value from 1
+    lea rsi, [memory + rdx]
 
     mov rax, 0 ;read
     mov rdi, 0 ;stdin
@@ -76,6 +73,53 @@ _sys.readchar:
     mov byte [memory], 0
     ret
 
-_start:
+_sys.allocbytes:
+    movzx rdx, byte [memory+1] ;amount of bytes in 1
+
     
+    mov rdi, 0 ;getting current brk
+    mov rax, 12
+    syscall
+
+    add rax,rdx ;adding value
+    mov rdi,rax ;pass new mem address
+
+    mov rax, 12 ;allocating
+    syscall
+
+
+
+    mov byte [memory], 0
+    ret
+
+_sys.deallocbytes:
+    movzx rdx, byte [memory+1] ;amount of bytes in 1
+
+    
+    mov rdi, 0 ;getting current brk
+    mov rax, 12
+    syscall
+
+    sub rax,rdx ;adding value
+    mov rdi,rax ;pass new mem address
+
+    mov rax, 12 ;deallocating
+    syscall
+
+
+
+    mov byte [memory], 0
+    ret
+
+_start:
+    mov rdi, 0 ;getting current brk
+    mov rax, 12
+    syscall
+
+    mov memory, rax
+
+    mov rdi, memory ;allocating initial 256 bytes
+    add rdi, 256
+    mov rax, 12
+    syscall
 

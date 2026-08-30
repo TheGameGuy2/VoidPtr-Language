@@ -18,6 +18,8 @@ public sealed class LinuxAsmBuilder : AsmBuilder
         sysCallLabels.Add(1,"_sys.printnum");
         sysCallLabels.Add(2,"_sys.printchar");
         sysCallLabels.Add(3,"_sys.readchar");
+        sysCallLabels.Add(4,"_sys.allocbytes");
+        sysCallLabels.Add(5,"_sys.deallocbytes");
     }
 
     public override void GenerateHeader()
