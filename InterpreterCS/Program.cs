@@ -2,7 +2,9 @@
 using Lexing;
 using Parsing;
 using Interpreter;
+using Compiler;
 using System.IO;
+using System.Diagnostics;
 
 string file = "main.vptr";
 
@@ -24,6 +26,8 @@ else
         ErrorHandler.Throw("No 'main.vptr' file could be found. Either create one or pass your file.");
     }
 }
+
+
 
 // --- Generating Tokens ---
 Lexer l = new(File.ReadAllText(file),file);
@@ -47,7 +51,9 @@ File.WriteAllText("tok_dump.txt",toks);
 // --- Generating Instructions ---
 Console.WriteLine("-Parsing");
 
-Parser parser = new(tokens);
+bool doCompile = args.Contains("-compile");
+
+Parser parser = new(tokens, doCompile);
 
 List<Instruction> instructions = parser.MakeInstructs();
 
@@ -60,9 +66,28 @@ foreach(Instruction inst in instructions)
 }
 File.WriteAllText("inst_dump.txt",instStr);
 
-// --- Running code ---
-Console.WriteLine("Executing.");
 
-Engine intpr = new(instructions);
-intpr.Run();
+if(doCompile)
+{
+    string fileName = Path.GetFileName(file).Replace(".vptr","");
+    Console.WriteLine("Compiling...");
+    Compiler.Compiler compiler = new(instructions,new LinuxAsmBuilder(parser.GetLabelDecode()));
+    string[] code = compiler.Compile();
+    File.WriteAllLines($"{fileName}.asm",code);
+    
+    Process nasm = Process.Start("nasm", $"-f elf64 {fileName}.asm -O2 -o {fileName}.o");
+    nasm.WaitForExit();
+
+    Process.Start("ld", $"{fileName}.o -o {fileName}");
+
+}
+else
+{
+    // --- Running code ---
+    Console.WriteLine("Executing.");
+
+    Engine intpr = new(instructions);
+    intpr.Run();
+}
+
 

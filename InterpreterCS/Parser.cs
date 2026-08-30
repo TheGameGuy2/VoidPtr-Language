@@ -21,9 +21,12 @@ public class Parser
 
     private List<Instruction> instructions = new();
 
-    public Parser(List<Token> tokens)
+    private readonly bool emitLabels;
+
+    public Parser(List<Token> tokens, bool emitLabels)
     {
         this.tokens = tokens;
+        this.emitLabels = emitLabels;
     }
 
     private Token Next()
@@ -136,6 +139,11 @@ public class Parser
     private void MakeLabel(string name, int instrIndx)
     {
         labelDict.Add(name, instrIndx);
+        
+        if(emitLabels)
+        {
+            instructions.Add(new(new(AddressMode.Const,instrIndx),new(),Operator.Label));
+        }
 
         //Labels can be used before they are defined, so we check if anyone was already using it.
         if(labelSubscribers.TryGetValue(name, out List<int> subs))

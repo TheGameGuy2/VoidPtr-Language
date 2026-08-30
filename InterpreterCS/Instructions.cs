@@ -19,7 +19,7 @@ public enum Operator : byte
     ShiftRight,
     ShiftLeft,
     Assign,
-    MemSet
+    Label
 }
 
 public struct InstrValue(AddressMode mode,int val)
