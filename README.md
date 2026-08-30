@@ -1,7 +1,7 @@
 <h1>VoidPtr</h1>
 <img src = "https://github.com/TheGameGuy2/ByteLang/blob/main/void_ptr_logo.png" </img>
 <h3>An eso lang allowing only logical bitwise operations on single bytes</h3>
-<p>This project was made for CS class. <br> The source of this documentation is src/Documentation.txt</p>
+<p>The source of this documentation is src/Documentation.txt</p>
 <h2>Usage</h2>
 
 <ul>
