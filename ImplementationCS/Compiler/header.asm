@@ -3,7 +3,8 @@ bits 64
 %define memory r12 ;heap pointer
 
 section .rodata
-    callmap: dq _sys.printchar, _sys.printnum, _sys.readchar, _sys.allocbytes, _sys.deallocbytes
+    callmap: dq _sys.printchar, _sys.printnum, _sys.readchar, _sys.allocbytes, _sys.deallocbytes, _sys.load32, _sys.write32, _sys.savepc, _sys.writepc
+
     call_map_max equ ($-callmap)/8
 
 section .text
@@ -46,7 +47,7 @@ _sys.printnum:
     lea rsi, [memory + rax] ;load address of char in rsi for syscall
 
     
-    mov bl, byte [rsi] ;save old value
+    movzx bl, byte [rsi] ;save old value
     
     add byte [rsi],48  ;convert to ascii
     
@@ -110,6 +111,44 @@ _sys.deallocbytes:
 
     mov byte [memory], 0
     ret
+
+_sys.load32:
+    ;layout: 1 points to -> [a0] [a1] [a2] [a3]
+    movzx rdx, byte [memory+1] ;start address of pointer
+    mov eax, [memory+rdx] ;address of 32 bit value
+    mov al, byte [memory+rax] ;load byte from address
+    mov byte [memory+1],al  ;write to 1
+
+    mov byte [memory], 0
+    ret
+
+_sys.write32:
+    ;layout: 1 points to -> [write value] [a0] [a1] [a2] [a3] 
+    movzx rdx, byte [memory+1] ;pointer to write value
+    mov eax, [memory+rdx+1] ;load write ddress
+    mov dl, byte [memory+rdx] ;saving write value into dl
+
+    mov [eax], dl ;writing to address
+    
+    mov byte [memory], 0
+    ret
+
+_sys.savepc:
+    pop rdx
+    push rdx
+    movzx rax, byte [memory+1]
+    mov [memory+rax],rdx
+
+    mov byte [memory], 0
+    ret
+
+_sys.writepc:
+    pop rax
+    movzx rax, byte [memory+1] 
+    mov rax, [memory+rax]
+    
+    mov byte [memory], 0
+    jmp rax
 
 _start:
     mov rdi, 0 ;getting current brk

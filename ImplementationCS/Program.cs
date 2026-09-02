@@ -46,7 +46,11 @@ foreach(Token t in tokens)
 {
     toks+=t.ToString() + "\n";
 }
-File.WriteAllText("tok_dump.txt",toks);
+
+if(args.Contains("-dump"))
+{
+    File.WriteAllText("tok_dump.txt",toks);
+}
 
 // --- Generating Instructions ---
 Console.WriteLine("-Parsing");
@@ -64,7 +68,12 @@ foreach(Instruction inst in instructions)
     instStr += instrCount +": "+ inst.ToString() + "\n";
     instrCount++;
 }
-File.WriteAllText("inst_dump.txt",instStr);
+
+if(args.Contains("-dump"))
+{
+    File.WriteAllText("inst_dump.txt",instStr);
+}
+
 
 
 if(doCompile)
