@@ -1,6 +1,7 @@
 bits 64
 
 %define memory r12 ;heap pointer
+%define pc r13d
 
 section .rodata
     callmap: dq _sys.printchar, _sys.printnum, _sys.readchar, _sys.allocbytes, _sys.deallocbytes, _sys.load32, _sys.write32, _sys.savepc, _sys.writepc
@@ -47,7 +48,7 @@ _sys.printnum:
     lea rsi, [memory + rax] ;load address of char in rsi for syscall
 
     
-    movzx bl, byte [rsi] ;save old value
+    mov bl, byte [rsi] ;save old value
     
     add byte [rsi],48  ;convert to ascii
     
@@ -134,23 +135,26 @@ _sys.write32:
     ret
 
 _sys.savepc:
-    pop rdx
-    push rdx
-    movzx rax, byte [memory+1]
-    mov [memory+rax],rdx
+    movzx rdx,byte [memory+1] ;dest. address
+    mov [memory+rdx], pc
 
     mov byte [memory], 0
     ret
 
+
 _sys.writepc:
-    pop rax
+    pop rax ;stack leak when dsyscall?
     movzx rax, byte [memory+1] 
-    mov rax, [memory+rax]
-    
+    mov eax, [memory+rax] ;load address
+    mov eax, [instrcts+rax*4] ;rel instruction adr.
+    add rax, _start ;to abs. address
+
     mov byte [memory], 0
     jmp rax
 
 _start:
+    xor pc,pc
+
     mov rdi, 0 ;getting current brk
     mov rax, 12
     syscall

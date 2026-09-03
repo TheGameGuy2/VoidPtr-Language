@@ -11,6 +11,7 @@ public sealed class LinuxAsmBuilder : AsmBuilder
     private bool endWithSyscall = true; //global state for adding dynamic syscall after instruction.
     private bool addBranchLabel = false; //Whether to add a branch label after the next instruction.
     private uint branchLabelId = 0; //label id used for compare to skip next instruction.
+    private uint currentInstruction = 0;
     public LinuxAsmBuilder(Dictionary<int,string> labelDecode)
     {
         this.labelDecode = labelDecode;
@@ -87,6 +88,9 @@ public sealed class LinuxAsmBuilder : AsmBuilder
         addBranchLabel = false;
         
         Add($"; {instruction}");
+        Add($"_i.{currentInstruction}:");
+        Add($"mov pc, {currentInstruction}");
+        currentInstruction++;
         switch(instruction.type)
         {
             case Operator.Assign:
@@ -253,24 +257,24 @@ public sealed class LinuxAsmBuilder : AsmBuilder
 
     public override void EmitLabel(int instruction_index)
     {
-        finalInstructions.Add("_usr."+labelDecode[instruction_index]+":\n");
+        Add("_usr."+labelDecode[instruction_index]+":\n");
     }
 
     public override void EmitJump(int jumpToLabel)
     {
         endWithSyscall = false;
-        finalInstructions.Add($"jmp {"_usr."+labelDecode[jumpToLabel]}");
+        Add($"jmp {"_usr."+labelDecode[jumpToLabel]}");
     }
 
     public override void EmitSyscall(int syscallID)
     {
         try
         {
-            finalInstructions.Add("call " + sysCallLabels[syscallID]);
+            Add("call " + sysCallLabels[syscallID]);
         }
         catch(Exception)
         {
-            ErrorHandler.Throw($"Invalid direct syscall {syscallID}.");   
+            ErrorHandler.Throw($"Unrecognized direct syscall {syscallID}.");   
         }
     }
 
@@ -280,6 +284,15 @@ public sealed class LinuxAsmBuilder : AsmBuilder
         Add("mov rdi, 0");
         Add("mov rax, 60");
         Add("syscall");
+
+        Add("section .rodata");
+        Add("instrcts:");
+        for(uint i = 0; i<currentInstruction; i++)
+        {
+            Add($"dd _i.{i} - _start");
+        }
+
+        
     }
     
 }
