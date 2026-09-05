@@ -1,5 +1,7 @@
 -Write file length when loading in syscall
 -New specification for CS compiler: 64bit mode
---storing RIP syscall
---loading RIP syscall
+--system call syscall
+--load VoidPtr address real virtual address
+--prepare args syscall (load bytes into call registers)
+
 --#stream x label_name #end -> streams label address into memory (?)

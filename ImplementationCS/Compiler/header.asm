@@ -47,19 +47,75 @@ _sys.printnum:
     movzx rax, byte [memory+1] ;load pointer value from 1
     lea rsi, [memory + rax] ;load address of char in rsi for syscall
 
-    
-    mov bl, byte [rsi] ;save old value
-    
-    add byte [rsi],48  ;convert to ascii
-    
+    mov r8b, byte [rsi];save old value
+    mov al, r8b
 
-    mov rdi,1 ;TODO: convert multi character numbers
+    push r9
+    mov r9b, 1 ;print 10 flag
+
+    movzx ax, al
+    xor bx,bx ;reset bx
+    mov bl, 100 ;divide by 100
+
+    div bl
+
+    mov bx, ax ;store res in bx
+
+    test al,al ;if n*10^2 is not 0 we need to force print 10^1 even if it is 0.
+    jnz .forceprint10
+    
+    mov r9b, 0
+    jmp .print10start
+
+    .forceprint10:
+
+    add al, '0' ;add 48
+    mov [rsi], al ;move ah to byte at rsi for printing
+
+    ;print 10^2
+    mov rdi,1 
     mov rdx,1
-
     mov rax,1 ;syswrite
     syscall
 
-    mov [rsi], bl ;restore original value
+    .print10start:
+    ;print 10^1
+    movzx ax, bh ;move result back into ax, move remainder into al and clean ax for 2. division 
+
+    xor bx,bx ;reset bx
+    mov bl, 10 ;divide by 10
+
+    div bl
+
+    mov bx, ax ;store res in bx
+    
+    test al,al
+    jnz .print10
+    test r9b,r9b
+    jz .print_end 
+    .print10:
+
+    add al, '0' ;add 48
+    mov [rsi], al ;move al to byte at rsi for printing
+
+    mov rdi,1 
+    mov rdx,1
+    mov rax,1 ;syswrite
+    syscall
+    
+    .print_end:
+    ;print 10^0
+    mov al, bh ;remainder in bh is our 10^2
+    add al, '0'
+    mov [rsi], al
+
+    mov rdi,1 
+    mov rdx,1
+    mov rax,1 ;syswrite
+    syscall
+
+    mov [rsi], r8b
+    pop r9 ;restore r9 because we are nice.
     mov byte [memory], 0
     ret
 
