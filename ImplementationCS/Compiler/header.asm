@@ -133,7 +133,6 @@ _sys.readchar:
 
 _sys.allocbytes:
     movzx rdx, byte [memory+1] ;amount of bytes in 1
-
     
     mov rdi, 0 ;getting current brk
     mov rax, 12
@@ -144,8 +143,6 @@ _sys.allocbytes:
 
     mov rax, 12 ;allocating
     syscall
-
-
 
     mov byte [memory], 0
     ret
